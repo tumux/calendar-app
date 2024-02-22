@@ -42,14 +42,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const currentMonthIndex = date.getMonth();
         const currentMonthName = date.toLocaleDateString('en-US', { month: 'long' });
         const monthAndYear = `<div class="month-section">
-                            <button onclick="window.goToPreviousMonth()">&lt;</button>
-                            <span>${currentMonthName}</span>
-                            <button onclick="window.goToNextMonth()">&gt;</button>
-                            <br>
+                        <div class="year-navigation">
                             <button onclick="window.goToPreviousYear()">&lt;&lt;</button>
                             <span>${currentYear}</span>
                             <button onclick="window.goToNextYear()">&gt;&gt;</button>
-                          </div>`;
+                        </div>
+                        <br>
+                        <div class="month-navigation">
+                            <button onclick="window.goToPreviousMonth()">&lt;</button>
+                            <span>${currentMonthName}</span>
+                            <button onclick="window.goToNextMonth()">&gt;</button>
+                        </div>
+                      </div>`;
         const firstDayOfMonth = new Date(currentYear, currentMonthIndex, 1);
         const lastDayOfMonth = new Date(currentYear, currentMonthIndex + 1, 0);
         const firstDayOfWeek = firstDayOfMonth.getDay() || 7;
