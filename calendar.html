@@ -4,7 +4,268 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendar</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Base styles for overall consistency */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        /* Container for the calendar and today section */
+        .container {
+            max-width: 800px; /* Maximum width of the container */
+            margin: 0 auto; /* Center the container */
+            padding: 20px;
+            background: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Styling the month section with navigation */
+        .month-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #e9eff1;
+            border-radius: 5px;
+        }
+
+        .year-navigation, .month-navigation {
+            display: flex;
+            align-items: center;
+        }
+
+        .month-section button {
+            background-color: #8faebe;
+            border: none;
+            border-radius: 5px;
+            color: #ffffff;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin: 0 5px;
+            transition: background-color 0.3s;
+        }
+
+        .month-section button:hover {
+            background-color: #729bad;
+        }
+
+        .month-section h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #333;
+        }
+
+        /* Calendar table styles */
+        .month-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .month-table th {
+            background-color: #8faebe;
+            color: #ffffff;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .month-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #e9eff1;
+        }
+
+        .month-table td a {
+            display: block;
+            padding: 5px;
+            text-decoration: none;
+            color: #333;
+            transition: background-color 0.3s;
+        }
+
+        .month-table td a:hover {
+            background-color: #e9eff1;
+        }
+
+        .current-day {
+            background-color: #bcd9ea;
+            font-weight: bold;
+        }
+
+        /* "Today" section styling */
+        .day-calendar {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #e9eff1;
+            border-radius: 5px;
+        }
+
+        .day-calendar h2 {
+            margin-top: 0;
+            color: #729bad;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .month-section {
+                flex-direction: column;
+            }
+
+            .year-navigation, .month-navigation {
+                justify-content: center;
+                margin: 10px 0;
+            }
+
+            .month-table th, .month-table td {
+                padding: 5px;
+            }
+        }
+
+        .holiday {
+            background-color: #ffcccc;
+        }
+
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentDate = new Date();
+
+            const dayCalendar = document.getElementById('day-calendar');
+            const monthCalendar = document.getElementById('month-calendar');
+
+            window.updateTodaySection = function(day) {
+                currentDate.setDate(day);
+                renderDayCalendar(currentDate);
+            };
+
+            window.goToPreviousMonth = function() {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendars();
+            };
+
+            window.goToNextMonth = function() {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendars();
+            };
+
+            window.goToPreviousYear = function() {
+                currentDate.setFullYear(currentDate.getFullYear() - 1);
+                renderCalendars();
+            };
+
+            window.goToNextYear = function() {
+                currentDate.setFullYear(currentDate.getFullYear() + 1);
+                renderCalendars();
+            };
+
+            function findHoliday(dateString) {
+                for (const division in bankHolidays) {
+                    if (bankHolidays.hasOwnProperty(division)) {
+                        const events = bankHolidays[division].events;
+                        const holiday = events.find(event => event.date === dateString);
+                        if (holiday) {
+                            return holiday; // Return as soon as a matching holiday is found
+                        }
+                    }
+                }
+                return null; // Return null if no matching holiday is found in any division
+            }
+
+            function renderDayCalendar(date) {
+                const dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                const holiday = findHoliday(dateString);
+
+                const isToday = date.toDateString() === new Date().toDateString();
+                const heading = isToday ? `<h2>Today</h2>` : '';
+                const holidayTitle = holiday ? `<h3>${holiday.title}</h3>` : '';
+
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const dayString = date.toLocaleDateString('en-US', options);
+                dayCalendar.innerHTML = `${heading}${holidayTitle}<p>${dayString}</p>`;
+            }
+
+
+            function renderMonthCalendar(date) {
+                const currentYear = date.getFullYear();
+                const currentMonthIndex = date.getMonth();
+                const currentMonthName = date.toLocaleDateString('en-US', { month: 'long' });
+                const monthAndYear = `<div class="month-section">
+                            <div class="year-navigation">
+                                <button onclick="window.goToPreviousYear()">&lt;&lt;</button>
+                                <span>${currentYear}</span>
+                                <button onclick="window.goToNextYear()">&gt;&gt;</button>
+                            </div>
+                            <br>
+                            <div class="month-navigation">
+                                <button onclick="window.goToPreviousMonth()">&lt;</button>
+                                <span>${currentMonthName}</span>
+                                <button onclick="window.goToNextMonth()">&gt;</button>
+                            </div>
+                          </div>`;
+                const firstDayOfMonth = new Date(currentYear, currentMonthIndex, 1);
+                const lastDayOfMonth = new Date(currentYear, currentMonthIndex + 1, 0);
+                const firstDayOfWeek = firstDayOfMonth.getDay() === 0 ? 7 : firstDayOfMonth.getDay();
+                const weeks = [];
+                let week = [];
+
+                // Adjust for Monday as the first day of the week
+                for (let i = 0; i < (firstDayOfWeek - 1); i++) {
+                    week.push('');
+                }
+
+                for (let day = 1; day <= lastDayOfMonth.getDate(); day++) {
+                    week.push(day);
+                    if (week.length === 7 || day === lastDayOfMonth.getDate()) {
+                        weeks.push([...week]);
+                        week = [];
+                    }
+                }
+
+                const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                const today = new Date();
+                const isCurrentMonthAndYear = today.getFullYear() === currentYear && today.getMonth() === currentMonthIndex;
+                const monthDays = `<div class="week"><table class="month-table">
+                        <tr>${weekdays.map(day => `<th>${day}</th>`).join('')}</tr>` +
+                    weeks.map(week => {
+                        return `<tr>${week.map(day => {
+                            const fullDate = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                            const isHoliday = findHoliday(fullDate) !== null;
+                            const isToday = isCurrentMonthAndYear && day === today.getDate();
+                            return `<td class="day ${isToday ? 'current-day' : ''} ${isHoliday ? 'holiday' : ''}">${day ? `<a href="#" onclick="window.updateTodaySection(${day}); return false;">${day}</a>` : ''}</td>`;
+                        }).join('')}</tr>`;
+                    }).join('') +
+                    `</table></div>`;
+
+                monthCalendar.innerHTML = monthAndYear + monthDays;
+            }
+
+
+
+            let bankHolidays = {};
+
+            function fetchBankHolidays() {
+                return fetch('bank-holidays.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        bankHolidays = data;
+                    });
+            }
+
+            function renderCalendars() {
+                renderDayCalendar(currentDate);
+                renderMonthCalendar(currentDate);
+            }
+
+            fetchBankHolidays().then(() => {
+                renderCalendars();
+            });
+        });
+    </script>
 </head>
 <body>
 <div class="container">
@@ -15,6 +276,5 @@
         <!-- Day calendar (Today section) will be displayed here -->
     </div>
 </div>
-<script src="script.js"></script>
 </body>
 </html>
